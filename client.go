@@ -1,4 +1,3 @@
-
 package webrelay
 
 import (
@@ -9,7 +8,6 @@ import (
 type Provider interface {
 	Get(url string) (*http.Response, error)
 	Do(req *http.Request) (*http.Response, error)
-
 }
 
 type Model interface {
@@ -20,22 +18,22 @@ type Model interface {
 }
 
 type Client struct {
-	Provider Provider
-	UserAgent string
-	Host string
-	UserName string
+	Provider        Provider
+	UserAgent       string
+	Host            string
+	UserName        string
 	ControlPassword string
-	model Model
+	model           Model
 }
 
 // Construct a new client
 func New(host, username, password string) (*Client, error) {
 	httpClient := &http.Client{}
 	client := &Client{
-		Provider: httpClient,
-		Host: host,
-		UserAgent: "go-webrelay/"+version,
-		UserName: username,
+		Provider:        httpClient,
+		Host:            host,
+		UserAgent:       "go-webrelay/" + version,
+		UserName:        username,
 		ControlPassword: password,
 	}
 	return client, client.setup()

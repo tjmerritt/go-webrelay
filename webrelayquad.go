@@ -1,16 +1,15 @@
-
 package webrelay
 
 import (
 	"fmt"
 	//"bytes"
 	//"io"
-	"io/ioutil"
-	"strings"
-	"net/http"
-	"net/url"
 	"encoding/base64"
 	"encoding/xml"
+	"io/ioutil"
+	"net/http"
+	"net/url"
+	"strings"
 )
 
 type webRelayQuad struct {
@@ -18,7 +17,7 @@ type webRelayQuad struct {
 }
 
 type param struct {
-	key string
+	key   string
 	value string
 }
 
@@ -27,17 +26,17 @@ type webRelayQuadRequest struct {
 }
 
 type webRelayQuadResponse struct {
-        Relay1State int         `xml:"relay1state"`
-        Relay2State int         `xml:"relay2state"`
-        Relay3State int         `xml:"relay3state"`
-        Relay4State int         `xml:"relay4state"`
+	Relay1State int `xml:"relay1state"`
+	Relay2State int `xml:"relay2state"`
+	Relay3State int `xml:"relay3state"`
+	Relay4State int `xml:"relay4state"`
 }
 
 func IsWebRelayQuad(c *Client) (bool, error) {
 	url := &url.URL{
 		Scheme: "http",
-		Host: c.Host,
-		Path: "menu.html",
+		Host:   c.Host,
+		Path:   "menu.html",
 	}
 	resp, err := c.Provider.Get(url.String())
 	if err != nil {
@@ -104,7 +103,7 @@ func (wrq *webRelayQuad) SetState(enable, values []bool) error {
 			vNum = 1
 		}
 		req.params = append(req.params, param{
-			key: fmt.Sprintf("relay%dState", i+1),
+			key:   fmt.Sprintf("relay%dState", i+1),
 			value: fmt.Sprintf("%d", vNum),
 		})
 	}
@@ -135,9 +134,9 @@ func (wrq webRelayQuad) stateFull(req *webRelayQuadRequest) (*webRelayQuadRespon
 		values[p.key] = a
 	}
 	url := &url.URL{
-		Scheme: "http",
-		Host: wrq.c.Host,
-		Path: "/stateFull.xml",
+		Scheme:   "http",
+		Host:     wrq.c.Host,
+		Path:     "/stateFull.xml",
 		RawQuery: values.Encode(),
 	}
 	headers := http.Header{
@@ -150,7 +149,7 @@ func (wrq webRelayQuad) stateFull(req *webRelayQuadRequest) (*webRelayQuadRespon
 	}
 	httpReq := &http.Request{
 		Method: "GET",
-		URL: url,
+		URL:    url,
 		Header: headers,
 	}
 	//fmt.Printf("URL: \"%s\"\n", httpReq.URL)

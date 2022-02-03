@@ -5,7 +5,7 @@ import (
 	"github.com/tjmerritt/go-webrelay"
 )
 
-func main()  {
+func main() {
 	client, err := webrelay.New("192.168.120.15", "", "")
 	if err != nil {
 		fmt.Printf("Error creating client: %v\n", err)
@@ -28,7 +28,7 @@ func formatState(state []bool) string {
 		if state[i] {
 			v = "ON"
 		}
-		str += fmt.Sprintf("Relay%d: %s", i + 1, v)
+		str += fmt.Sprintf("Relay%d: %s", i+1, v)
 	}
 	return str
 }
