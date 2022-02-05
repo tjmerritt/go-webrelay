@@ -27,25 +27,14 @@ type Client struct {
 }
 
 type probeFunc func(c *Client) (bool, Model) 
-
-type prober struct {
-	name string
-	probe probeFunc
-}
-
-var probers = make(map[string]prober)
+var probers = make(map[string]probeFunc)
 
 func RegisterModel(name string, probe probeFunc) error {
-	p := prober{
-		name: name,
-		probe: probe,
-	}
-
 	if _, ok := probers[name]; ok {
 		return fmt.Errorf("prober %s, previously registered", name)
 	}
 
-	probers[name] = p
+	probers[name] = probe
 	return  nil
 }
 
@@ -71,27 +60,13 @@ func (c *Client) SetUserAgent(agent string) {
 }
 
 func (c *Client) probe() (Model, error) {
-	if c.model != nil {
-		return c.model, nil
-	}
-
 	for _, prober := range probers {
-		if ok, m := prober.probe(c); ok {
+		if ok, m := prober(c); ok {
 			return m, nil
 		}
 
 	}
 	return nil, fmt.Errorf("Unknown model device")
-/*
-	ok, err := IsWebRelayQuad(c)
-	if err != nil {
-		return nil, err
-	}
-	if ok {
-		c.model = WebRelayQuadModel(c)
-		return c.model, nil
-	}
-*/
 }
 
 func (c *Client) setup() error {
@@ -104,6 +79,13 @@ func (c *Client) setup() error {
 	}
 	c.model = m
 	return nil
+}
+
+func (c *Client) ModelName() string {
+	if c.model == nil {
+		return ""
+	}
+	return c.model.Name()
 }
 
 func (c *Client) GetState() ([]bool, error) {
@@ -125,11 +107,4 @@ func (c *Client) SetRelay(relay int, value bool) error {
 		return err
 	}
 	return c.model.SetRelay(relay, value)
-}
-
-func (c *Client) ModelName() string {
-	if c.model == nil {
-		return ""
-	}
-	return c.model.Name()
 }
