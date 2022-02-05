@@ -26,8 +26,31 @@ type Client struct {
 	model           Model
 }
 
+type probeFunc func(c *Client) (bool, Model) 
+
+type prober struct {
+	name string
+	probe probeFunc
+}
+
+var probers = make(map[string]prober)
+
+func RegisterModel(name string, probe probeFunc) error {
+	p := prober{
+		name: name,
+		probe: probe,
+	}
+
+	if _, ok := probers[name]; ok {
+		return fmt.Errorf("prober %s, previously registered", name)
+	}
+
+	probers[name] = p
+	return  nil
+}
+
 // Construct a new client
-func New(host, username, password string) (*Client, error) {
+func New(host, username, password string) *Client {
 	httpClient := &http.Client{}
 	client := &Client{
 		Provider:        httpClient,
@@ -36,7 +59,7 @@ func New(host, username, password string) (*Client, error) {
 		UserName:        username,
 		ControlPassword: password,
 	}
-	return client, client.setup()
+	return client
 }
 
 func (c *Client) SetProvider(provider Provider) {
@@ -51,6 +74,15 @@ func (c *Client) probe() (Model, error) {
 	if c.model != nil {
 		return c.model, nil
 	}
+
+	for _, prober := range probers {
+		if ok, m := prober.probe(c); ok {
+			return m, nil
+		}
+
+	}
+	return nil, fmt.Errorf("Unknown model device")
+/*
 	ok, err := IsWebRelayQuad(c)
 	if err != nil {
 		return nil, err
@@ -59,7 +91,7 @@ func (c *Client) probe() (Model, error) {
 		c.model = WebRelayQuadModel(c)
 		return c.model, nil
 	}
-	return nil, fmt.Errorf("Unknown model device")
+*/
 }
 
 func (c *Client) setup() error {

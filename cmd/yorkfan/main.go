@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/tjmerritt/go-webrelay"
+	_ "github.com/tjmerritt/go-webrelay/model/webrelayquad"
 )
 
 // env:
@@ -51,11 +52,7 @@ func main() {
 
 	//fmt.Printf("Host: %s, User: %s, Password: %s\n", host, user, passwd)
 
-	client, err := webrelay.New(host, user, passwd)
-	if err != nil {
-		fmt.Printf("Error creating client: %v\n", err)
-		os.Exit(1)
-	}
+	client := webrelay.New(host, user, passwd)
 	state, err := client.GetState()
 	if err != nil {
 		fmt.Printf("Error getting state: %v\n", err)
@@ -76,13 +73,13 @@ func main() {
 		fmt.Printf("Error updating fan speed: %v\n", err)
 		os.Exit(1)
 	}
-	//checkNewState, _ := checkState(state)
-	if currentSpeed == "" || currentSpeed == newSpeed {
+	switch {
+	case currentSpeed == "":
 		fmt.Printf("yorkfan: Fan speed set to %s\n", newSpeed)
-		//fmt.Printf("yorkfan: Fan speed set to %s (%s)\n", newSpeed, checkNewState)
-	} else {
+	case currentSpeed == newSpeed:
+		fmt.Printf("yorkfan: Fan speed reset to %s\n", newSpeed)
+	default:
 		fmt.Printf("yorkfan: Fan speed changed from %s to %s\n", currentSpeed, newSpeed)
-		//fmt.Printf("yorkfan: Fan speed changed from %s to %s (%s)\n", currentSpeed, newSpeed, checkNewState)
 	}
 }
 
